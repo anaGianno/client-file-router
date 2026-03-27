@@ -30,19 +30,41 @@ try:
         # only get client folders within the category folders
         if short_folder_name in category_folders:
             for subfolder in subfolders:
-                if dest_folders.get(short_folder_name,None) == None:
-                    dest_folders.setdefault(short_folder_name,[subfolder])    
-                else:
-                    dest_folders.get(short_folder_name,None).append(subfolder)
+                names = subfolder.split(" ")
+                count = 0
+                subfolder_client_names = []
+                full_name = ''
+                # concatenate first and last name together and add to list
+                for name in names:
+                    if name == 'n':
+                        continue
 
-        # print destination folders
-        print('Existing client destination folders:')
-        for dest_folder in dest_folders.keys():
-            print(dest_folder + ':')
-            dest_client_folders = dest_folders.get(dest_folder,None)
-            for dest_client_folder in dest_client_folders:
-                print(dest_client_folder)
-            print()
+                    if count == 0:
+                        full_name += name
+                        count += 1
+                    elif count == 1:
+                        full_name += ' ' + name
+                        subfolder_client_names.append(full_name)
+                        full_name = ''
+                        count = 0
+                        
+                if dest_folders.get(short_folder_name,None) == None:
+                    dest_folders.setdefault(short_folder_name,[subfolder_client_names])    
+                else:
+                    dest_folders.get(short_folder_name,None).append(subfolder_client_names)
+
+    # print destination folders
+    print('Existing client destination folders:')
+    for dest_folder in dest_folders.keys():
+        print(dest_folder + ':')
+        dest_client_folders = dest_folders.get(dest_folder,None)
+        for client_names in dest_client_folders:
+            all_names = ''
+            for client_name in client_names:
+                all_names += client_name + ' n '
+            print(all_names[:-3])
+        print()
+        
 except Exception as e:
     print(f'Failed to get destination folders: {e}')
 
@@ -65,7 +87,7 @@ try:
             else:
                 client_files.get(client_name,None).append(file_name)
 
-    # print destination folders
+    # # print destination folders
     print('Downloaded client files:')
     for client_name in client_files.keys():
         print(client_name + ':')
@@ -81,7 +103,10 @@ except Exception as e:
     print(f'Failed to get downloaded client files/folders: {e}')
 
 # check if client exists in directory 
-# for dest_folder 
+# for client_name in client_files.keys():
+    
+    
+
 
 # transfer client files if found
 
