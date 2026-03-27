@@ -13,10 +13,15 @@ Automates sorting and transferring mortgage adviser client files into categorize
 1. Clone the repo:
 ```bash
 git clone https://github.com/anaGianno/client-file-router.git
+```
 
 2. Navigate into the project:
+```bash
 cd client-file-router
+```
 
 ## Usage
 Run the program:
+```bash
 python ClientFileRouter.py
+```
