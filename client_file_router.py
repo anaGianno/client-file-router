@@ -44,7 +44,7 @@ def get_destination_folders(root_path):
         # read in all existing client destination folders in given directory
         for folder_name, subfolders, file_names in os.walk(root_path):
             # remove full path from current folder
-            short_folder_name = folder_name.split('/')[-1]
+            short_folder_name = Path(folder_name).name
             # only get client folders within the category folders
             if short_folder_name in category_folders:
                 for subfolder in subfolders:
@@ -101,7 +101,7 @@ def get_downloaded_files(root_path):
     dwn_client_files = {}
     try:
         # iterate through each file in download folder
-        downloads_folder = root_path + '/Downloads'
+        downloads_folder = Path(root_path) / 'Downloads'
         for folder_names, subfolders, file_names in os.walk(downloads_folder):
             for file_name in file_names:
                 # get client full name from filename
@@ -125,50 +125,56 @@ def get_downloaded_files(root_path):
     except Exception as e:
         print(f'Failed to get downloaded client files: {e}')
 
-def get_downloaded_folders(root_path):
+def route_client(root_path,dwn_client_name,dwn_client_files,dest_folders):
     """
-    Get all client folder names from the Downloads folder
+    Route downloaded client files for given client to its destination folder
 
     Args:
         root_path (str): User selected path to the root directory 
-
-    Returns:
-        dwn_client_folders (dict): All client folders names in Downloads
+        dwn_client_name (str): given client name from route_all_clients function
+        dwn_client_files (dict): names of all clients in the downloads folder aswell as their file names
+        dest_folders (dict): names of the category folders and the names of the client destination folders inside
     """
-    dwn_client_folders = []
     try:
-        # iterate through each subfolder in download folder
-        downloads_folder = root_path + '/Downloads'
-        for folder_names, subfolders, file_names in os.walk(downloads_folder):
-            for subfolder in subfolders:
-                dwn_client_folders.append(subfolder)
+        # check all categories
+        for category in dest_folders.keys():
+            dest_client_folders = dest_folders.get(category,None)
+            # check all client folders in each category
+            for dest_client_folder in dest_client_folders:
+                dest_path = Path('')
+                client_folder_names = ' n '.join(dest_client_folder)
 
-        # print folders in downloads
-        print('Client folders in Downloads:')
-        for client_folder in dwn_client_folders:
-            print(client_folder)
-
-        return dwn_client_folders
+                # check if the client name exists in the folder name
+                if dwn_client_name in dest_client_folder:
+                    for file in dwn_client_files.get(dwn_client_name,None):
+                            file_path = Path(root_path) / 'Downloads' / file
+                            dest_path = Path(root_path) / category / client_folder_names 
+                            dest_path.mkdir(exist_ok=True)
+                            dst_file = dest_path / file
+                            shutil.move(file_path,dst_file)
+                    return
+        return
     except Exception as e:
-        print(f'Failed to get downloaded client files: {e}')
+        print(f'Failed to get route client files for client {dwn_client_name}: {e}')
 
+def route_all_clients(root_path,dwn_client_files,dest_folders):
+    """
+    Route downloaded client files for all clients to their destination folders
 
-# def route_clients(dwn_client_files,dwn_client_folders,dest_folders):
-#     # check if client exists in directory for files
-#     for dwn_client_name in dwn_client_files.keys():
-#             for category in dest_folders.keys():
-#                 dest_client_names = dest_folders.get(category,None)
-#                 for dest_client_name in dest_client_names:
-#                     for dest_client_name in dest_client_names:
-#                         if dest_client_name == dest_client_name:
-#                             # transfer client files if found
+    Args:
+        root_path (str): User selected path to the root directory 
+        dwn_client_files (dict): names of all clients in the downloads folder aswell as their file names
+        dest_folders (dict): names of the category folders and the names of the client destination folders inside
+    """
+    # attempt to route each client's files in the downloaded files dictionary
+    for dwn_client_name in dwn_client_files.keys():
+        route_client(root_path,dwn_client_name,dwn_client_files,dest_folders)
 
 def main():
     root_path = select_root_folder()
     dest_folders = get_destination_folders(root_path)
     dwn_client_files = get_downloaded_files(root_path)
-    dwn_client_folders = get_downloaded_folders(root_path)
-    # route_clients(dwn_client_files,dwn_client_folders,dest_folders)
+    route_all_clients(root_path,dwn_client_files,dest_folders)
 
 # run code if file was executed directly
 if __name__ == "__main__":
