@@ -4,10 +4,6 @@ from pathlib import Path
 import shutil
 import os
 
-# greet user and prompt for destination directory
-print('Welcome to Client File Router!\n')
-print('Please select the client folder directory (select the current directory to use the dummy data for testing):')
-
 def select_root_folder():
     """
     Get the selected root folder from the user
@@ -15,6 +11,7 @@ def select_root_folder():
     Returns:
         root_path: the root folder that the user selected
     """
+    print('Please select the client folder directory (select the current directory to use the dummy data for testing):')
     # get root directory
     try:
         # create folder GUI window
@@ -170,12 +167,61 @@ def route_all_clients(root_path,dwn_client_files,dest_folders):
     for dwn_client_name in dwn_client_files.keys():
         route_client(root_path,dwn_client_name,dwn_client_files,dest_folders)
 
-def main():
-    root_path = select_root_folder()
-    dest_folders = get_destination_folders(root_path)
-    dwn_client_files = get_downloaded_files(root_path)
-    route_all_clients(root_path,dwn_client_files,dest_folders)
+def reset_folders_testing():
+    """
+    Resets the downloaded client files back to the downloads folder from their destination (For testing)
+    """
+    print('Please select the client folder directory (select the current directory to use the dummy data for testing):')
+    category_folders = ['New Purchase','Refinance','Refinance & NewPurchase','Refinance & Restructure','Refinance & Top-up','Refix & Refinance','Refix & Restructure']
+    # get root directory
+    try:
+        # create folder GUI window
+        root = tk.Tk()
+        root.withdraw()
+        root_path = filedialog.askdirectory(title = "Select a folder")
+        print('Selected folder: ', root_path)
 
+        downloads_path = Path(root_path) / 'Downloads'
+        for folder_name, subfolders, file_names in os.walk(root_path):
+            # remove full path from current folder
+            short_folder_name = Path(folder_name).name
+            # only get client folders within the category folders
+            if short_folder_name in category_folders:
+                # iterate through each category
+                for subfolder in subfolders:
+                    dest_client_folder_path = Path(root_path) / Path(short_folder_name) / Path(subfolder)
+                    # iterate through each client destination folder
+                    for folder_name_L2, subfolders_L2, file_names_L2 in os.walk(dest_client_folder_path):
+                        # for subfolder_L2 in subfolders_L2:
+                        #     dest_client_folder_path = Path(dest_client_folder_path) / Path(subfolder_L2)
+                        # transfer each client file back to the downloads folder
+                        for file_name_L2 in file_names_L2:
+                            if file_name_L2.endswith('.gitkeep') or file_name_L2.endswith('.md') or file_name_L2.startswith('Wrong Person'):
+                                continue
+                            dest_client_file_path = Path(dest_client_folder_path) / Path(file_name_L2)
+                            shutil.move(dest_client_file_path,downloads_path)
+                            
+    except Exception as e:
+        print(f'Failed to reset folders: {e}')
+
+
+def main():
+    # greet user and prompt for destination directory
+    print('Welcome to Client File Router!\n')
+    print('What would you like to do?')
+    while True:
+        user_input = input('Enter [1] to select your client folder directory, Enter [2] to reset the client files back the the downloads folder after routing (TESTING ONLY), Enter [3] to exit: ')
+
+        if user_input == "1":
+            root_path = select_root_folder()
+            dest_folders = get_destination_folders(root_path)
+            dwn_client_files = get_downloaded_files(root_path)
+            route_all_clients(root_path,dwn_client_files,dest_folders)
+        elif user_input == "2":
+            reset_folders_testing()
+        elif user_input == "3":
+            exit()
+        
 # run code if file was executed directly
 if __name__ == "__main__":
     main()
