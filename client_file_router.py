@@ -41,9 +41,9 @@ def get_destination_folders(root_path):
         # read in all existing client destination folders in given directory
         for folder_name, subfolders, file_names in os.walk(root_path):
             # remove full path from current folder
-            short_folder_name = Path(folder_name).name
+            subfolder_category = Path(folder_name).name
             # only get client folders within the category folders
-            if short_folder_name in category_folders:
+            if subfolder_category in category_folders:
                 for subfolder in subfolders:
                     names = subfolder.split(" ")
                     count = 0
@@ -63,10 +63,10 @@ def get_destination_folders(root_path):
                             full_name = ''
                             count = 0
                             
-                    if dest_folders.get(short_folder_name,None) == None:
-                        dest_folders.setdefault(short_folder_name,[dest_client_names])    
+                    if dest_folders.get(subfolder_category,None) == None:
+                        dest_folders.setdefault(subfolder_category,[dest_client_names])    
                     else:
-                        dest_folders.get(short_folder_name,None).append(dest_client_names)
+                        dest_folders.get(subfolder_category,None).append(dest_client_names)
 
         # print destination folders
         print('Existing client destination folders:')
@@ -184,21 +184,18 @@ def reset_folders_testing():
         downloads_path = Path(root_path) / 'Downloads'
         for folder_name, subfolders, file_names in os.walk(root_path):
             # remove full path from current folder
-            short_folder_name = Path(folder_name).name
+            subfolder_category = Path(folder_name).name
             # only get client folders within the category folders
-            if short_folder_name in category_folders:
-                # iterate through each category
-                for subfolder in subfolders:
-                    dest_client_folder_path = Path(root_path) / Path(short_folder_name) / Path(subfolder)
+            if subfolder_category in category_folders:
+                # iterate through each client folder
+                for dest_client_folder in subfolders:
+                    dest_client_folder_path = Path(root_path) / Path(subfolder_category) / Path(dest_client_folder)
                     # iterate through each client destination folder
-                    for folder_name_L2, subfolders_L2, file_names_L2 in os.walk(dest_client_folder_path):
-                        # for subfolder_L2 in subfolders_L2:
-                        #     dest_client_folder_path = Path(dest_client_folder_path) / Path(subfolder_L2)
-                        # transfer each client file back to the downloads folder
-                        for file_name_L2 in file_names_L2:
-                            if file_name_L2.endswith('.gitkeep') or file_name_L2.endswith('.md') or file_name_L2.startswith('Wrong Person'):
+                    for folder_name_L2, subfolders_L2, dest_client_folder in os.walk(dest_client_folder_path):
+                        for dest_client_file in dest_client_folder:
+                            if dest_client_file.endswith('.gitkeep') or dest_client_file.endswith('.md') or dest_client_file.startswith('Wrong Person'):
                                 continue
-                            dest_client_file_path = Path(dest_client_folder_path) / Path(file_name_L2)
+                            dest_client_file_path = Path(dest_client_folder_path) / Path(dest_client_file)
                             shutil.move(dest_client_file_path,downloads_path)
                             
     except Exception as e:
