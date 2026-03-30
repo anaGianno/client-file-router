@@ -3,6 +3,7 @@ from tkinter import filedialog
 from pathlib import Path
 import shutil
 import os
+import time
 
 CATEGORY_FOLDERS = ['New Purchase','Refinance','Refinance & New Purchase','Refinance & Restructure','Refinance & Top-up','Refix & Refinance','Refix & Restructure']
 
@@ -13,7 +14,9 @@ def select_root_folder():
     Returns:
         root_path: the root folder that the user selected
     """
-    print('Please select the root folder; containing the category folders and download folder (select the current directory to use the dummy data for testing):')
+    print('Please select the root folder containing downloads/category folders (current directory for testing):')
+    print('Opening directory...')
+    time.sleep(4)
     # get root directory
     try:
         # create folder GUI window
@@ -176,6 +179,8 @@ def reset_folders_testing():
     Resets the downloaded client files back to the downloads folder from their destination (For testing)
     """
     print('Please select the client folder directory (select the current directory to use the dummy data for testing):')
+    print('Opening directory...')
+    time.sleep(3)
     # get root directory
     try:
         # create folder GUI window
@@ -204,6 +209,9 @@ def reset_folders_testing():
         print(f'Failed to reset folders: {e}')
 
 def create_client_folder():
+    """
+    Creates a new client folder for an unrecognized client's files in chosen category and routes files to it
+    """
     # get client name from user
     client_name = input('\nEnter client name the full name of the client you would like to create a new folder for (e.g John Public): ')
     client_name_formatted = ''
@@ -263,10 +271,28 @@ def create_client_folder():
     dest_folders.setdefault(chosen_category_formatted,[client_name_formatted])
     route_client(root_path,client_name_formatted,dwn_client_files,dest_folders)
     print('Created new folder!\n')
-
-
-# fix casing for client names
     
+def move_folder():
+    """
+    Moves the first selected folder to the second selected folder
+    """
+    try:
+        print("Select the folder you want to move!")
+        print("Opening directory...\n")
+        time.sleep(3)
+
+        # create folder GUI window
+        root = tk.Tk()
+        root.withdraw()
+        folder_to_move = filedialog.askdirectory(title = "Select the folder you want to move")
+
+        print("Select the destination for the first folder")
+        print("Opening directory...\n")
+        time.sleep(3)
+        destination_folder = filedialog.askdirectory(title = "Select the destination for the first folder")
+        shutil.move(folder_to_move,destination_folder)
+    except Exception as e:
+        print(f'Failed to move folders: {e}')
 
 def main():
     # greet user and prompt for destination directory
@@ -275,6 +301,7 @@ def main():
         print('[1]: Route downloaded client files')
         print('[2]: Create new client folder and transfer files')
         print('[3]: Reset client files to Downloads folder (FOR TESTING)')
+        print('[4]: Move existing client folder')
         print('[x]: Exit')
         user_input = input('Please enter a number (1-3) or (x) to exit: ')
 
@@ -287,6 +314,8 @@ def main():
             create_client_folder()
         elif user_input == "3":
             reset_folders_testing()
+        elif user_input == "4":
+            move_folder()
         elif user_input == "x":
             exit()
         
