@@ -3,7 +3,6 @@ from tkinter import filedialog
 from pathlib import Path
 import shutil
 import os
-import time
 
 CATEGORY_FOLDERS = ['New Purchase','Refinance','Refinance & New Purchase','Refinance & Restructure','Refinance & Top-up','Refix & Refinance','Refix & Restructure']
 
@@ -16,7 +15,7 @@ def select_root_folder():
     """
     print('Please select the root folder containing downloads/category folders (current directory for testing):')
     print('Opening directory...')
-    time.sleep(4)
+
     # get root directory
     try:
         # create folder GUI window
@@ -133,7 +132,7 @@ def route_client(root_path,dwn_client_name,dwn_client_files,dest_folders):
     Args:
         root_path (str): User selected path to the root directory 
         dwn_client_name (str): given client name from route_all_clients function
-        dwn_client_files (dict): names of all clients in the downloads folder aswell as their file names
+        dwn_client_folders (dict): names of all clients in the downloads folder aswell as their file names
         dest_folders (dict): names of the category folders and the names of the client destination folders inside
     """
     try:
@@ -143,10 +142,7 @@ def route_client(root_path,dwn_client_name,dwn_client_files,dest_folders):
             # check all client folders in each category
             for dest_client_folder in dest_client_folders:
                 dest_path = Path('')
-                if len(dest_client_folders) > 1:
-                    client_folder_names = ' n '.join(dest_client_folder)
-                else:
-                    client_folder_names = dest_client_folder
+                client_folder_names = ' n '.join(dest_client_folder)
 
                 # check if the client name exists in the folder name
                 if dwn_client_name in dest_client_folder:
@@ -180,7 +176,7 @@ def reset_folders_testing():
     """
     print('Please select the client folder directory (select the current directory to use the dummy data for testing):')
     print('Opening directory...')
-    time.sleep(3)
+
     # get root directory
     try:
         # create folder GUI window
@@ -212,65 +208,70 @@ def create_client_folder():
     """
     Creates a new client folder for an unrecognized client's files in chosen category and routes files to it
     """
-    # get client name from user
-    client_name = input('\nEnter client name the full name of the client you would like to create a new folder for (e.g John Public): ')
-    client_name_formatted = ''
+    try:
+        # get client name from user
+        client_name = input('\nEnter client name the full name of the client you would like to create a new folder for (e.g John Public): ')
+        client_name_formatted = ''
 
-    for name in client_name.split(" "):
-        client_name_formatted += name[0].upper() + name[1:].lower() + " "
-    client_name_formatted = client_name_formatted[:-1]
+        # redefine for format
+        for name in client_name.split(" "):
+            client_name_formatted += name[0].upper() + name[1:].lower() + " "
+        client_name_formatted = client_name_formatted[:-1]
 
-    # get root folder from user
-    root_path = select_root_folder()
+        # get root folder from user
+        root_path = select_root_folder()
 
-    # get category from user 
-    print('CATEGORY FOLDERS:')
-    while True:
-        for category in CATEGORY_FOLDERS:
-            print(f'[{category}]')
-        chosen_category = input('\nPlease enter a category folder location for the new folder (e.g Refinance) or (x) to exit: ')
+        # get category from user 
+        print('CATEGORY FOLDERS:')
+        while True:
+            for category in CATEGORY_FOLDERS:
+                print(f'[{category}]')
+            chosen_category = input('\nPlease enter a category folder location for the new folder (e.g Refinance) or (x) to exit: ')
 
-        if chosen_category == 'x':
-            exit()
+            if chosen_category == 'x':
+                exit()
 
-        chosen_category_formatted = ''
-        for word in chosen_category.split(" "):
-            chosen_category_formatted += word[0].upper() + word[1:].lower() + " "
-        chosen_category_formatted = chosen_category_formatted[:-1]
+            chosen_category_formatted = ''
+            for word in chosen_category.split(" "):
+                chosen_category_formatted += word[0].upper() + word[1:].lower() + " "
+            chosen_category_formatted = chosen_category_formatted[:-1]
 
-        if chosen_category_formatted in CATEGORY_FOLDERS:
-            break
-        else:
-            print(f'{chosen_category} is an invalid category')
+            if chosen_category_formatted in CATEGORY_FOLDERS:
+                break
+            else:
+                print(f'{chosen_category} is an invalid category')
 
-    dwn_client_files = {}
-    # get client files in downloads folder
-    downloads_path = Path(root_path) / 'Downloads'
-    for folder_names, subfolders, client_files in os.walk(downloads_path):
-        for client_file in client_files:
-            # get client full name from filename
-            dwn_client_name = client_file.split(' ')[0] + ' ' + client_file.split(' ')[1]
-            # group all files from current client
-            if dwn_client_name.upper() == client_name.upper():
-                if dwn_client_files.get(dwn_client_name,None) == None:
-                    dwn_client_files.setdefault(client_name_formatted,[client_file])
-                else:
-                    dwn_client_files.get(client_name_formatted,None).append(client_file)
+        dwn_client_files = {}
+        # get client files in downloads folder
+        downloads_path = Path(root_path) / 'Downloads'
+        for folder_names, subfolders, client_files in os.walk(downloads_path):
+            for client_file in client_files:
+                # get client full name from filename
+                dwn_client_name = client_file.split(' ')[0] + ' ' + client_file.split(' ')[1]
+                # group all files from current client
+                if dwn_client_name.upper() == client_name.upper():
+                    if dwn_client_files.get(dwn_client_name,None) == None:
+                        dwn_client_files.setdefault(client_name_formatted,[client_file])
+                    else:
+                        dwn_client_files.get(client_name_formatted,None).append(client_file)
 
-    # exit if no files found in Downloads folder
-    if dwn_client_files.get(client_name_formatted,None) == None:
-        print(f"Client name '{client_name}' not found in downloads folder: returning to main menu...\n")
-        return
+        # exit if no files found in Downloads folder
+        if dwn_client_files.get(client_name_formatted,None) == None:
+            print(f"Client name '{client_name}' not found in downloads folder: returning to main menu...\n")
+        
+            return
 
-    # create new client folder in category folder
-    new_folder_path = Path(root_path) / chosen_category_formatted / client_name_formatted
-    new_folder_path.mkdir(exist_ok = True)
+        # create new client folder in category folder
+        new_folder_path = Path(root_path) / chosen_category_formatted / client_name_formatted
+        new_folder_path.mkdir(exist_ok = True)
 
-    # move client files to new folder
-    dest_folders = {}
-    dest_folders.setdefault(chosen_category_formatted,[client_name_formatted])
-    route_client(root_path,client_name_formatted,dwn_client_files,dest_folders)
-    print('Created new folder!\n')
+        # move client files to new folder
+        dest_folders = {}
+        dest_folders.setdefault(chosen_category_formatted,[client_name_formatted])
+        route_client(root_path,client_name_formatted,dwn_client_files,dest_folders)
+        print('Created new folder!\n')
+    except Exception as e:
+        print(f'Failed to create client folder: {e}\n')
     
 def move_folder():
     """
@@ -279,7 +280,6 @@ def move_folder():
     try:
         print("Select the folder you want to move!")
         print("Opening directory...\n")
-        time.sleep(3)
 
         # create folder GUI window
         root = tk.Tk()
@@ -288,11 +288,81 @@ def move_folder():
 
         print("Select the destination for the first folder")
         print("Opening directory...\n")
-        time.sleep(3)
+    
         destination_folder = filedialog.askdirectory(title = "Select the destination for the first folder")
         shutil.move(folder_to_move,destination_folder)
     except Exception as e:
-        print(f'Failed to move folders: {e}')
+        print(f'Failed to move folders: {e}\n')
+
+def separate_client_files():
+    """
+    Separates the chosen clients files from existing folder to new folder
+    """
+    try:
+        print("\nSelect the client folder you want to separate files in!")
+        print("Opening directory...\n")
+
+        # create folder GUI window
+        root = tk.Tk()
+        root.withdraw()
+        separate_folder = filedialog.askdirectory(title = "Select the folder you want to separate")
+
+        # check if chosen folder is inside the cateogry folders
+        if separate_folder.split("/")[-2] not in CATEGORY_FOLDERS:
+            print(f"Chosen folder is not inside the category folders: returning to main menu...\n")
+        
+            return
+        
+        # get names from chosen folder
+        names = Path(separate_folder).name.split(" ")
+        client_names = []
+        count = 0
+        full_name = ''
+        for name in names:
+            if name == 'n':
+                continue
+
+            if count == 0:
+                full_name += name
+                count += 1
+            elif count == 1:
+                full_name += ' ' + name
+                client_names.append(full_name)
+                full_name = ''
+                count = 0
+
+        if len(client_names) == 1:
+            print('Only one client in this folder: returning to main menu...')
+            return
+
+        # ask user which client they would like to separate
+        for i in range (1,len(client_names) + 1):
+            print(f'[{i}]: ' + client_names[i-1])
+        remove_client = client_names[int(input(f'Choose the client [1-{len(client_names)}] you would like to separate from the folder: ')) - 1]
+
+        # create new folder for separated client
+        new_folder = Path(separate_folder).parent / remove_client
+        new_folder.mkdir(exist_ok = True)       
+
+        # go inside the chosen folder
+        file_count = 0
+        for folder_name, subfolders, file_names in os.walk(separate_folder):
+            # find files with the client name
+            for file_name in file_names:
+                if file_name.startswith(remove_client):
+                    # move that file to new folder
+                    file_to_move = Path(separate_folder) / file_name
+                    shutil.move(file_to_move,new_folder)
+                    file_count += 1
+
+        # rename the separate folder to remove the clients name
+        client_names.remove(remove_client)
+        new_file_name = ' n '.join(client_names)
+        Path(separate_folder).rename(Path(separate_folder).parent / Path(new_file_name))
+
+        print(f'Separated all {file_count} files of {remove_client} from {separate_folder}')        
+    except Exception as e:
+        print(f'Failed to separate files: {e}\n')
 
 def main():
     # greet user and prompt for destination directory
@@ -300,10 +370,11 @@ def main():
     while True:
         print('[1]: Route downloaded client files')
         print('[2]: Create new client folder and transfer files')
-        print('[3]: Reset client files to Downloads folder (FOR TESTING)')
-        print('[4]: Move existing client folder')
+        print('[3]: Separate client files to new folder')
+        print('[4]: Reset client files to Downloads folder (FOR TESTING)')
+        print('[5]: Move existing client folder')
         print('[x]: Exit')
-        user_input = input('Please enter a number (1-3) or (x) to exit: ')
+        user_input = input('Please enter a number (1-5) or (x) to exit: ')
 
         if user_input == "1":
             root_path = select_root_folder()
@@ -313,8 +384,10 @@ def main():
         elif user_input == "2":
             create_client_folder()
         elif user_input == "3":
-            reset_folders_testing()
+            separate_client_files()
         elif user_input == "4":
+            reset_folders_testing()
+        elif user_input == "5":
             move_folder()
         elif user_input == "x":
             exit()
