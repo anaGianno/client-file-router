@@ -4,7 +4,7 @@ Automates sorting and transferring mortgage adviser client files into categorize
 ## Features (To be implemented)
 - Detects, categorizes, and transfers recognized client files from download folder to matched directory 
 - Combine related client folders together
-- Transfer unrecognized client folders to given category
+- Transfer unrecognized client files to a new folder in given category
 
 ## Prerequisites
 - Install Python 3.14+: [Download Python](https://www.python.org/downloads/)
