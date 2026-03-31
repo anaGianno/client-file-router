@@ -3,6 +3,7 @@ from tkinter import filedialog
 from pathlib import Path
 import shutil
 import os
+import time
 
 CATEGORY_FOLDERS = ['New Purchase','Refinance','Refinance & New Purchase','Refinance & Restructure','Refinance & Top-up','Refix & Refinance','Refix & Restructure']
 
@@ -18,7 +19,7 @@ def select_root_folder():
 
     # get root directory
     try:
-        # create folder GUI window
+        # create folder GUI window                 
         root = tk.Tk()
         root.withdraw()
         root_path = filedialog.askdirectory(title = "Select a folder")
@@ -210,7 +211,7 @@ def create_client_folder():
     """
     try:
         # get client name from user
-        client_name = input('\nEnter client name the full name of the client you would like to create a new folder for (e.g John Public): ')
+        client_name = input('\nEnter the full name of the client you would like to create a new folder for (e.g John Public): ')
         client_name_formatted = ''
 
         # redefine for format
@@ -360,9 +361,147 @@ def separate_client_files():
         new_file_name = ' n '.join(client_names)
         Path(separate_folder).rename(Path(separate_folder).parent / Path(new_file_name))
 
-        print(f'Separated all {file_count} files of {remove_client} from {separate_folder}')        
+        print(f'Separated {file_count} file/s of {remove_client} from {separate_folder}\n')        
     except Exception as e:
         print(f'Failed to separate files: {e}\n')
+
+def merge_download_files(dest_merge,dwn_folder):
+    """
+    Merge client files in Downloads to other client's folder
+    """
+    try:
+        # get client name from user
+        client_name = input('\nEnter the full name of the client you would like to merge (e.g Joe Bloggs): ')
+        client_name_formatted = ''
+
+        # redefine for format
+        for name in client_name.split(" "):
+            client_name_formatted += name[0].upper() + name[1:].lower() + " "
+        client_name_formatted = client_name_formatted[:-1]
+
+        # get client files in downloads folder
+        for folder_names, subfolders, client_files in os.walk(Path(dwn_folder)):
+            for client_file in client_files:
+                # get client full name from filename
+                dwn_client_name = client_file.split(' ')[0] + ' ' + client_file.split(' ')[1]
+                # merge file to other client's folder
+                if client_file.startswith(client_name_formatted):
+                    shutil.move(Path(dwn_folder) / client_file, Path(dest_merge))
+
+        # get names from chosen folder
+        names = Path(dest_merge).name.split(" ")
+        client_names = []
+        count = 0
+        full_name = ''
+        for name in names:
+            if name == 'n':
+                continue
+
+            if count == 0:
+                full_name += name
+                count += 1
+            elif count == 1:
+                full_name += ' ' + name
+                client_names.append(full_name)
+                full_name = ''
+                count = 0
+
+        # check if client files were merged to their own folder
+        if client_name_formatted not in client_names:
+            # rename merged folder to include new client
+            new_path = Path(dest_merge).parent / (Path(dest_merge).name + ' n ' + client_name_formatted)
+            Path(dest_merge).rename(new_path)
+        
+    except Exception as e:
+        print(f'Failed to merge files from Downloads folder: {e}\n')
+
+def merge_two_folders(dest_merge,src_merge):
+    """
+    Merge two client folders together
+    """
+    try:
+        # route files to merged folder
+        for folder_names,subfolders,file_names in os.walk(src_merge):
+            for file_name in file_names:
+                shutil.move(Path(src_merge) / file_name, dest_merge)
+        
+        # delete empty folder
+        Path(src_merge).rmdir()
+
+        # get names from chosen folder
+        names = Path(src_merge).name.split(" ")
+        client_names = []
+        count = 0
+        full_name = ''
+        for name in names:
+            if name == 'n':
+                continue
+
+            if count == 0:
+                full_name += name
+                count += 1
+            elif count == 1:
+                full_name += ' ' + name
+                client_names.append(full_name)
+                full_name = ''
+                count = 0
+
+        for name in client_names:
+            if name in dest_merge:
+                client_names.remove(name)
+
+        new_folder_name = ' n '.join(client_names)
+
+        # rename merged folder to include new client/s
+        new_path = Path(dest_merge).parent / (Path(dest_merge).name + ' n ' + new_folder_name)
+        Path(dest_merge).rename(new_path)
+    except Exception as e:
+        print(f'Failed to merge two tolders together: {e}\n')
+
+def merge_client_files():
+    """
+    Merge client files into one folder from existing client folders or downloaded client files
+    """
+    try:
+        # get first merge source
+        print('Select the source folder you want to merge from (Downloads folder or other existing client folder):')
+        # create folder GUI window
+        root = tk.Tk()
+        root.withdraw()
+        src_merge = filedialog.askdirectory(title = "Select the folder to merge into")
+
+        # get second merge source
+        print('Select the client folder to merge into:\n')
+        # create folder GUI window
+        root = tk.Tk()
+        root.withdraw()
+        dest_merge = filedialog.askdirectory(title = "Select the client folder to merge into")
+
+        src_path = Path(src_merge)
+        # route files on download folder
+        if src_path.name == 'Downloads':
+            merge_download_files(dest_merge,src_path)
+        elif str(src_path.parent).split('/')[-1] in CATEGORY_FOLDERS:
+            # route files on client folder
+            merge_two_folders(dest_merge,src_path)
+        else:
+            print("User did not choose Downlaods folder or client folder: returning...")
+            exit()
+    except Exception as e:
+        print(f'Failed to merge files: {e}\n')
+
+def rename_folder():
+    print('Select the source folder you want to rename:')
+    # create folder GUI window
+    root = tk.Tk()
+    root.withdraw()
+    src_rename = filedialog.askdirectory(title = "Select the folder to merge into")
+
+    new_name = input('Enter new folder name: ')
+
+    Path(src_rename).rename(Path(src_rename).parent / new_name)
+
+
 
 def main():
     # greet user and prompt for destination directory
@@ -370,11 +509,13 @@ def main():
     while True:
         print('[1]: Route downloaded client files')
         print('[2]: Create new client folder and transfer files')
-        print('[3]: Separate client files to new folder')
-        print('[4]: Reset client files to Downloads folder (FOR TESTING)')
+        print('[3]: Merge client files into one folder')
+        print('[4]: Separate client files to new folder')
         print('[5]: Move existing client folder')
+        print('[6]: Rename existing client folder')
+        print('[7]: Reset client files to Downloads folder (FOR TESTING)')
         print('[x]: Exit')
-        user_input = input('Please enter a number (1-5) or (x) to exit: ')
+        user_input = input('Please enter a number (1-7) or (x) to exit: ')
 
         if user_input == "1":
             root_path = select_root_folder()
@@ -384,11 +525,15 @@ def main():
         elif user_input == "2":
             create_client_folder()
         elif user_input == "3":
-            separate_client_files()
+            merge_client_files()
         elif user_input == "4":
-            reset_folders_testing()
+            separate_client_files()
         elif user_input == "5":
             move_folder()
+        elif user_input == "6":
+            rename_folder()
+        elif user_input == "7":
+            reset_folders_testing()
         elif user_input == "x":
             exit()
         
