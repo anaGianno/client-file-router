@@ -22,6 +22,7 @@ def select_root_folder():
         # create folder GUI window                 
         root = tk.Tk()
         root.withdraw()
+        root.attributes('-topmost', True)
         root_path = filedialog.askdirectory(title = "Select a folder")
         print('Selected folder: ', root_path)
 
@@ -183,6 +184,7 @@ def reset_folders_testing():
         # create folder GUI window
         root = tk.Tk()
         root.withdraw()
+        root.attributes('-topmost', True)
         root_path = filedialog.askdirectory(title = "Select a folder")
         print('Selected folder: ', root_path)
 
@@ -259,7 +261,6 @@ def create_client_folder():
         # exit if no files found in Downloads folder
         if dwn_client_files.get(client_name_formatted,None) == None:
             print(f"Client name '{client_name}' not found in downloads folder: returning to main menu...\n")
-        
             return
 
         # create new client folder in category folder
@@ -268,7 +269,7 @@ def create_client_folder():
 
         # move client files to new folder
         dest_folders = {}
-        dest_folders.setdefault(chosen_category_formatted,[client_name_formatted])
+        dest_folders.setdefault(chosen_category_formatted,[[client_name_formatted]])
         route_client(root_path,client_name_formatted,dwn_client_files,dest_folders)
         print('Created new folder!\n')
     except Exception as e:
@@ -285,6 +286,7 @@ def move_folder():
         # create folder GUI window
         root = tk.Tk()
         root.withdraw()
+        root.attributes('-topmost', True)
         folder_to_move = filedialog.askdirectory(title = "Select the folder you want to move")
 
         print("Select the destination for the first folder")
@@ -306,6 +308,7 @@ def separate_client_files():
         # create folder GUI window
         root = tk.Tk()
         root.withdraw()
+        root.attributes('-topmost', True)
         separate_folder = filedialog.askdirectory(title = "Select the folder you want to separate")
 
         # check if chosen folder is inside the cateogry folders
@@ -468,6 +471,7 @@ def merge_client_files():
         # create folder GUI window
         root = tk.Tk()
         root.withdraw()
+        root.attributes('-topmost', True)
         src_merge = filedialog.askdirectory(title = "Select the folder to merge into")
 
         # get second merge source
@@ -475,6 +479,7 @@ def merge_client_files():
         # create folder GUI window
         root = tk.Tk()
         root.withdraw()
+        root.attributes('-topmost', True)
         dest_merge = filedialog.askdirectory(title = "Select the client folder to merge into")
 
         src_path = Path(src_merge)
@@ -495,6 +500,7 @@ def rename_folder():
     # create folder GUI window
     root = tk.Tk()
     root.withdraw()
+    root.attributes('-topmost', True)
     src_rename = filedialog.askdirectory(title = "Select the folder to merge into")
 
     new_name = input('Enter new folder name: ')
