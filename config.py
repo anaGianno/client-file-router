@@ -1,0 +1,1 @@
+CATEGORY_FOLDERS = ['New Purchase','Refinance','Refinance & New Purchase','Refinance & Restructure','Refinance & Top-up','Refix & Refinance','Refix & Restructure']
