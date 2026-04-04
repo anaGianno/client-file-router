@@ -6,7 +6,7 @@ This tool is designed to reduce manual file sorting for administrative workflows
 ## Features 
 - Detects, categorizes, and transfers recognized client files from download folder to matched directory 
 - Transfer unrecognized client files to a new folder in given category
-- Combine related client files into one folder
+- Merge related client files into one folder
 - Separate client files from an existing folder to new folder
 - Transfer existing client folder
 - Rename existing client folder
@@ -29,5 +29,5 @@ cd client-file-router
 ## Usage
 Run the program:
 ```bash
-python ClientFileRouter.py
+python main.py
 ```
