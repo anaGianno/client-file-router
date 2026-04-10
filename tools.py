@@ -97,7 +97,7 @@ def create_client_folder():
         client_name_formatted = ''
 
         # redefine for format
-        for name in client_name.split(" "):
+        for name in client_name.split():
             client_name_formatted += name[0].upper() + name[1:].lower() + " "
         client_name_formatted = client_name_formatted[:-1]
 
@@ -115,7 +115,7 @@ def create_client_folder():
                 exit()
 
             chosen_category_formatted = ''
-            for word in chosen_category.split(" "):
+            for word in chosen_category.split():
                 chosen_category_formatted += word[0].upper() + word[1:].lower() + " "
             chosen_category_formatted = chosen_category_formatted[:-1]
 
@@ -200,7 +200,7 @@ def separate_client_files():
             return
         
         # get names from chosen folder
-        names = Path(separate_folder).name.split(" ")
+        names = Path(separate_folder).name.split()
         client_names = []
         count = 0
         full_name = ''
@@ -261,7 +261,7 @@ def merge_download_files(dest_merge,dwn_folder):
         client_name_formatted = ''
 
         # redefine for format
-        for name in client_name.split(" "):
+        for name in client_name.split():
             client_name_formatted += name[0].upper() + name[1:].lower() + " "
         client_name_formatted = client_name_formatted[:-1]
 
@@ -275,7 +275,7 @@ def merge_download_files(dest_merge,dwn_folder):
                     shutil.move(Path(dwn_folder) / client_file, duplicate_file_rename(Path(dest_merge) / client_file))
 
         # get names from chosen folder
-        names = Path(dest_merge).name.split(" ")
+        names = Path(dest_merge).name.split()
         client_names = []
         count = 0
         full_name = ''
@@ -315,7 +315,7 @@ def merge_two_folders(dest_merge,src_merge):
         Path(src_merge).rmdir()
 
         # get names from chosen folder
-        names = Path(src_merge).name.split(" ")
+        names = Path(src_merge).name.split()
         client_names = []
         count = 0
         full_name = ''

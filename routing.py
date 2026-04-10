@@ -25,7 +25,7 @@ def get_destination_folders(root_path):
             # only get client folders within the category folders
             if subfolder_category in CATEGORY_FOLDERS:
                 for subfolder in subfolders:
-                    names = subfolder.split(" ")
+                    names = subfolder.split()
                     count = 0
                     dest_client_names = []
                     full_name = ''
