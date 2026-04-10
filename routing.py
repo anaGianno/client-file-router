@@ -81,8 +81,12 @@ def get_downloaded_files(root_path):
         downloads_path = Path(root_path) / 'Downloads'
         for folder_names, subfolders, file_names in os.walk(downloads_path):
             for client_file in file_names:
+                parts = client_file.split(' ')
+                if len(parts) < 2:
+                    print(f"Skipping invalid filename: {client_file}")
+                    continue
                 # get client full name from filename
-                dwn_client_name = client_file.split(' ')[0] + ' ' + client_file.split(' ')[1]
+                dwn_client_name = parts[0] + ' ' + parts[1]
                 # group all files from current client
                 if dwn_client_files.get(dwn_client_name,None) == None:
                     dwn_client_files.setdefault(dwn_client_name,[client_file])
@@ -101,6 +105,7 @@ def get_downloaded_files(root_path):
         return dwn_client_files
     except Exception as e:
         print(f'Failed to get downloaded client files: {e}')
+        return {}
 
 def route_client(root_path,dwn_client_name,dwn_client_files,dest_folders):
     """
