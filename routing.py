@@ -117,6 +117,8 @@ def route_client(root_path,dwn_client_name,dwn_client_files,dest_folders):
         dwn_client_folders (dict): names of all clients in the downloads folder aswell as their file names
         dest_folders (dict): names of the category folders and the names of the client destination folders inside
     """
+    # keep track of files moved
+    file_record = [0,0]
     try:
         # check all categories
         for category in dest_folders.keys():
@@ -129,16 +131,25 @@ def route_client(root_path,dwn_client_name,dwn_client_files,dest_folders):
                 # check if the client name exists in the folder name
                 if dwn_client_name in dest_client_folder:
                     for file in dwn_client_files.get(dwn_client_name,None):
+                        try:
                             file_path = Path(root_path) / 'Downloads' / file
-                            dest_path = Path(root_path) / category / client_folder_names 
+                            dest_path = Path(root_path) / category / client_folder_names
                             dest_path.mkdir(exist_ok=True)
+
                             dest_file = dest_path / file
                             dest_file = duplicate_file_rename(dest_file)
-                            shutil.move(file_path,dest_file)
-                    return
-        return
+
+                            shutil.move(file_path, dest_file)
+                            file_record[0] += 1
+
+                        except Exception as move_error:
+                            print(f"Failed to move {file}: {move_error}")
+                            file_record[1] += 1
+                    return file_record
+        return file_record
     except Exception as e:
         print(f'Failed to get route client files for client {dwn_client_name}: {e}')
+        return file_record
 
 def route_all_clients(root_path,dwn_client_files,dest_folders):
     """
@@ -149,6 +160,12 @@ def route_all_clients(root_path,dwn_client_files,dest_folders):
         dwn_client_files (dict): names of all clients in the downloads folder aswell as their file names
         dest_folders (dict): names of the category folders and the names of the client destination folders inside
     """
+    total_file_record = [0,0]
     # attempt to route each client's files in the downloaded files dictionary
     for dwn_client_name in dwn_client_files.keys():
-        route_client(root_path,dwn_client_name,dwn_client_files,dest_folders)
+        file_record = route_client(root_path,dwn_client_name,dwn_client_files,dest_folders)
+        total_file_record[0] += file_record[0]
+        total_file_record[1] += file_record[1]
+
+    print(f"Total files moved: {total_file_record[0]}")
+    print(f"Total files failed: {total_file_record[1]}")
