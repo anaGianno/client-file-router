@@ -1,6 +1,7 @@
 from config import CATEGORY_FOLDERS
 from pathlib import Path
 from tools import duplicate_file_rename
+from tools import select_root_folder
 import shutil
 import os
 import datetime
@@ -169,3 +170,71 @@ def route_all_clients(root_path,dwn_client_files,dest_folders):
 
     print(f"Total files moved: {total_file_record[0]}")
     print(f"Total files failed: {total_file_record[1]}")
+
+def create_client_folder():
+    """
+    Creates a new client folder for an unrecognized client's files in chosen category and routes files to it
+    """
+    try:
+        # get client name from user
+        client_name = input('\nEnter the full name of the client you would like to create a new folder for (e.g John Public): ')
+        client_name_formatted = ''
+
+        # redefine for format
+        for name in client_name.split():
+            client_name_formatted += name[0].upper() + name[1:].lower() + " "
+        client_name_formatted = client_name_formatted[:-1]
+
+        # get root folder from user
+        root_path = select_root_folder()
+
+        # get category from user 
+        print('CATEGORY FOLDERS:')
+        while True:
+            for category in CATEGORY_FOLDERS:
+                print(f'[{category}]')
+            chosen_category = input('\nPlease enter a category folder location for the new folder (e.g Refinance) or (x) to exit: ')
+
+            if chosen_category == 'x':
+                exit()
+
+            chosen_category_formatted = ''
+            for word in chosen_category.split():
+                chosen_category_formatted += word[0].upper() + word[1:].lower() + " "
+            chosen_category_formatted = chosen_category_formatted[:-1]
+
+            if chosen_category_formatted in CATEGORY_FOLDERS:
+                break
+            else:
+                print(f'{chosen_category} is an invalid category')
+
+        dwn_client_files = {}
+        # get client files in downloads folder
+        downloads_path = Path(root_path) / 'Downloads'
+        for folder_names, subfolders, client_files in os.walk(downloads_path):
+            for client_file in client_files:
+                # get client full name from filename
+                dwn_client_name = client_file.split(' ')[0] + ' ' + client_file.split(' ')[1]
+                # group all files from current client
+                if dwn_client_name.upper() == client_name.upper():
+                    if dwn_client_files.get(dwn_client_name,None) == None:
+                        dwn_client_files.setdefault(client_name_formatted,[client_file])
+                    else:
+                        dwn_client_files.get(client_name_formatted,None).append(client_file)
+
+        # exit if no files found in Downloads folder
+        if dwn_client_files.get(client_name_formatted,None) == None:
+            print(f"Client name '{client_name}' not found in downloads folder: returning to main menu...\n")
+            return
+
+        # create new client folder in category folder
+        new_folder_path = Path(root_path) / chosen_category_formatted / client_name_formatted
+        new_folder_path.mkdir(exist_ok = True)
+
+        # move client files to new folder
+        dest_folders = {}
+        dest_folders.setdefault(chosen_category_formatted,[[client_name_formatted]])
+        route_client(root_path,client_name_formatted,dwn_client_files,dest_folders)
+        print('Created new folder!\n')
+    except Exception as e:
+        print(f'Failed to create client folder: {e}\n')
