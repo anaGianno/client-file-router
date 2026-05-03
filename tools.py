@@ -5,6 +5,7 @@ from pathlib import Path
 import shutil
 import os
 import datetime
+from dotenv import load_dotenv
 
 def duplicate_file_rename(dest_file):
     """
@@ -66,7 +67,7 @@ def reset_folders_testing():
         root_path = filedialog.askdirectory(title = "Select a folder")
         print('Selected folder: ', root_path)
 
-        downloads_path = Path(root_path) / 'Downloads'
+        downloads_path = Path(root_path) / os.getenv("DWN_FOLDER_NAME")
         for folder_name, subfolders, file_names in os.walk(root_path):
             # remove full path from current folder
             subfolder_category = Path(folder_name).name
@@ -299,7 +300,7 @@ def merge_client_files():
 
         src_path = Path(src_merge)
         # route files on download folder
-        if src_path.name == 'Downloads':
+        if src_path.name == os.getenv("DWN_FOLDER_NAME"):
             merge_download_files(dest_merge,src_path)
         elif str(src_path.parent).split('/')[-1] in CATEGORY_FOLDERS:
             # route files on client folder

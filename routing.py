@@ -5,6 +5,7 @@ from tools import select_root_folder
 import shutil
 import os
 import datetime
+from dotenv import load_dotenv
 
 def get_destination_folders(root_path):
     """
@@ -79,7 +80,7 @@ def get_downloaded_files(root_path):
     dwn_client_files = {}
     try:
         # iterate through each file in download folder
-        downloads_path = Path(root_path) / 'Downloads'
+        downloads_path = Path(root_path) / os.getenv("DWN_FOLDER_NAME")
         for folder_names, subfolders, file_names in os.walk(downloads_path):
             for client_file in file_names:
                 parts = client_file.split(' ')
@@ -133,7 +134,7 @@ def route_client(root_path,dwn_client_name,dwn_client_files,dest_folders):
                 if dwn_client_name in dest_client_folder:
                     for file in dwn_client_files.get(dwn_client_name,None):
                         try:
-                            file_path = Path(root_path) / 'Downloads' / file
+                            file_path = Path(root_path) / os.getenv("DWN_FOLDER_NAME") / file
                             dest_path = Path(root_path) / category / client_folder_names
                             dest_path.mkdir(exist_ok=True)
 
@@ -210,7 +211,7 @@ def create_client_folder():
 
         dwn_client_files = {}
         # get client files in downloads folder
-        downloads_path = Path(root_path) / 'Downloads'
+        downloads_path = Path(root_path) / os.getenv("DWN_FOLDER_NAME")
         for folder_names, subfolders, client_files in os.walk(downloads_path):
             for client_file in client_files:
                 # get client full name from filename
