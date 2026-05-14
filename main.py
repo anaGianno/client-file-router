@@ -36,7 +36,7 @@ def main():
         elif user_input == "2":
             create_client_folder()
         elif user_input == "3":
-            merge_client_files()
+            merge_client_files()        
         elif user_input == "4":
             separate_client_files()
         elif user_input == "5":

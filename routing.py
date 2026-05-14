@@ -215,6 +215,8 @@ def create_client_folder():
         for folder_names, subfolders, client_files in os.walk(downloads_path):
             for client_file in client_files:
                 # get client full name from filename
+                if len(client_file.split(' ')) == 1:
+                    continue
                 dwn_client_name = client_file.split(' ')[0] + ' ' + client_file.split(' ')[1]
                 # group all files from current client
                 if dwn_client_name.upper() == client_name.upper():

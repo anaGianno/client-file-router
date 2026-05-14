@@ -201,6 +201,8 @@ def merge_download_files(dest_merge,dwn_folder):
         # get client files in downloads folder
         for folder_names, subfolders, client_files in os.walk(Path(dwn_folder)):
             for client_file in client_files:
+                if len(client_file.split(' ')) == 1:
+                    continue
                 # get client full name from filename
                 dwn_client_name = client_file.split(' ')[0] + ' ' + client_file.split(' ')[1]
                 # merge file to other client's folder
@@ -234,6 +236,41 @@ def merge_download_files(dest_merge,dwn_folder):
     except Exception as e:
         print(f'Failed to merge files from Downloads folder: {e}\n')
 
+
+def merge_client_files():
+    """
+    Merge client files into one folder from existing client folders or downloaded client files
+    """
+    try:
+        # get first merge source
+        print('Select the source folder you want to merge from (Downloads folder or other existing client folder):')
+        # create folder GUI window
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes('-topmost', True)
+        src_merge = filedialog.askdirectory(title = "Select the folder to merge into")
+
+        # get second merge source
+        print('Select the client folder to merge into:\n')
+        # create folder GUI window
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes('-topmost', True)
+        dest_merge = filedialog.askdirectory(title = "Select the client folder to merge into")
+
+        src_path = Path(src_merge)
+        # route files on download folder
+        if src_path.name == os.getenv("DWN_FOLDER_NAME"):
+            merge_download_files(dest_merge,src_path)
+        elif str(src_path.parent.name) in CATEGORY_FOLDERS:
+            # route files on client folder
+            merge_two_folders(dest_merge,src_path)
+        else:
+            print("User did not choose Downloads folder or client folder: returning...")
+            exit()
+    except Exception as e:
+        print(f'Failed to merge files: {e}\n')
+
 def merge_two_folders(dest_merge,src_merge):
     """
     Merge two client folders together
@@ -242,7 +279,7 @@ def merge_two_folders(dest_merge,src_merge):
         # route files to merged folder
         for folder_names,subfolders,file_names in os.walk(src_merge):
             for file_name in file_names:
-                shutil.move(Path(src_merge) / file_name, duplicate_file_rename(Path(dest_merge) / filename))
+                shutil.move(Path(src_merge) / file_name, duplicate_file_rename(Path(dest_merge) / file_name))
         
         # delete empty folder
         Path(src_merge).rmdir()
@@ -275,41 +312,7 @@ def merge_two_folders(dest_merge,src_merge):
         new_path = Path(dest_merge).parent / (Path(dest_merge).name + ' n ' + new_folder_name)
         Path(dest_merge).rename(new_path)
     except Exception as e:
-        print(f'Failed to merge two tolders together: {e}\n')
-
-def merge_client_files():
-    """
-    Merge client files into one folder from existing client folders or downloaded client files
-    """
-    try:
-        # get first merge source
-        print('Select the source folder you want to merge from (Downloads folder or other existing client folder):')
-        # create folder GUI window
-        root = tk.Tk()
-        root.withdraw()
-        root.attributes('-topmost', True)
-        src_merge = filedialog.askdirectory(title = "Select the folder to merge into")
-
-        # get second merge source
-        print('Select the client folder to merge into:\n')
-        # create folder GUI window
-        root = tk.Tk()
-        root.withdraw()
-        root.attributes('-topmost', True)
-        dest_merge = filedialog.askdirectory(title = "Select the client folder to merge into")
-
-        src_path = Path(src_merge)
-        # route files on download folder
-        if src_path.name == os.getenv("DWN_FOLDER_NAME"):
-            merge_download_files(dest_merge,src_path)
-        elif str(src_path.parent).split('/')[-1] in CATEGORY_FOLDERS:
-            # route files on client folder
-            merge_two_folders(dest_merge,src_path)
-        else:
-            print("User did not choose Downlaods folder or client folder: returning...")
-            exit()
-    except Exception as e:
-        print(f'Failed to merge files: {e}\n')
+        print(f'Failed to merge two folders together: {e}\n')
 
 def rename_folder():
     """
